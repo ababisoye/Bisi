@@ -1,7 +1,12 @@
 import axios from "axios";
 import { useToast } from "vue-toastification";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "/api";
+// The API runs in a separate container exposed on port 8000. Derive its host
+// from the page so the Compose stack also works when opened from another
+// machine on the network. Deployments can still override the full URL.
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  `${window.location.protocol}//${window.location.hostname}:8000`;
 
 const apiClient = axios.create({
   baseURL: API_URL,

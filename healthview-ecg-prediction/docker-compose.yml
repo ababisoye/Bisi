@@ -15,3 +15,6 @@ services:
     build: ./back-python
     volumes:
       - ./back-python:/app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
