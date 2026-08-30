@@ -1,5 +1,6 @@
 """HTTP API for ECG CSV uploads and score tracking."""
 
+import os
 from io import BytesIO
 
 import pandas as pd
@@ -13,11 +14,23 @@ from database import Base, SessionLocal, engine
 from models import Score
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+DEFAULT_CORS_ORIGINS = ("http://localhost:3000", "http://127.0.0.1:3000")
+
+
+def configured_cors_origins():
+    """Return comma-separated frontend origins, falling back to local Compose."""
+    configured = os.getenv("CORS_ORIGINS", "")
+    return [origin.strip() for origin in configured.split(",") if origin.strip()] or list(
+        DEFAULT_CORS_ORIGINS
+    )
+
 
 app = FastAPI(title="HealthView ECG API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=configured_cors_origins(),
+    # Allow the Compose frontend when it is opened through any LAN/remote host.
+    allow_origin_regex=r"https?://[^/]+:3000",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,7 +65,7 @@ async def analyze(file: UploadFile = File(...)):
 
     try:
         frame = pd.read_csv(BytesIO(contents))
-    except (pd.errors.ParserError, UnicodeDecodeError) as exc:
+    except (pd.errors.EmptyDataError, pd.errors.ParserError, UnicodeDecodeError) as exc:
         raise HTTPException(status_code=400, detail="The uploaded file is not a valid CSV.") from exc
 
     if frame.empty or not len(frame.columns):
