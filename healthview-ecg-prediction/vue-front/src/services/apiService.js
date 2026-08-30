@@ -1,7 +1,10 @@
 import axios from "axios";
 import { useToast } from "vue-toastification";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "/api";
+// The API runs in a separate container. `localhost` is intentional here: this
+// code executes in the user's browser, where the Docker service name is not
+// resolvable. Deployments behind a reverse proxy can still set VITE_API_URL.
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 const apiClient = axios.create({
   baseURL: API_URL,
