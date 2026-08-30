@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useToast } from "vue-toastification";
 
-// The API runs in a separate container. `localhost` is intentional here: this
-// code executes in the user's browser, where the Docker service name is not
-// resolvable. Deployments behind a reverse proxy can still set VITE_API_URL.
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+// The API runs in a separate container exposed on port 8000. Derive its host
+// from the page so the Compose stack also works when opened from another
+// machine on the network. Deployments can still override the full URL.
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  `${window.location.protocol}//${window.location.hostname}:8000`;
 
 const apiClient = axios.create({
   baseURL: API_URL,
