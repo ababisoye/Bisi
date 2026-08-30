@@ -1,0 +1,17 @@
+services:
+  webapp:
+    container_name: ecg-prediction-ia_front
+    image: ecg-prediction-front:1.0.0
+    build: ./vue-front
+    volumes:
+      - ./vue-front:/app
+    ports:
+      - "3000:80" # Spécifie explicitement le mapping du port
+    restart: unless-stopped
+
+  ecg-prediction-back:
+    container_name: ecg-prediction-back
+    image: ecg-prediction-ia:latest
+    build: ./back-python
+    volumes:
+      - ./back-python:/app
